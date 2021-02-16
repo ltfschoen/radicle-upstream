@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use warp::{filters::BoxedFilter, path, Filter, Rejection, Reply};
 
-use crate::{context, http};
+use crate::{context, http, identity};
 
 /// Combination of all source filters.
 pub fn filters(ctx: context::Context) -> BoxedFilter<(impl Reply,)> {
@@ -13,6 +13,7 @@ pub fn filters(ctx: context::Context) -> BoxedFilter<(impl Reply,)> {
         .or(commits_filter(ctx.clone()))
         .or(local_state_filter())
         .or(tags_filter(ctx.clone()))
+        .or(merge_requests_filter(ctx.clone()))
         .or(tree_filter(ctx))
         .boxed()
 }
@@ -86,6 +87,18 @@ fn tags_filter(
         .and(warp::get())
         .and(http::with_context_unsealed(ctx))
         .and_then(handler::tags)
+}
+
+/// `GET /merge_requests/<project_urn>`
+fn merge_requests_filter(
+    ctx: context::Context,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    path("merge_requests")
+        .and(path::param::<coco::Urn>())
+        .and(path::end())
+        .and(warp::get())
+        .and(http::with_context_unsealed(ctx))
+        .and_then(handler::merge_requests)
 }
 
 /// `GET /tree/<project_urn>?peerId=<peer_id>&prefix=<prefix>*revision=<revision>`
@@ -249,6 +262,19 @@ mod handler {
         Ok(reply::json(&tags))
     }
 
+    /// Fetch the list [`coco::source::Tag`].
+    pub async fn merge_requests(
+        _project_urn: coco::Urn,
+        _ctx: context::Unsealed,
+    ) -> Result<impl Reply, Rejection> {
+        Ok(reply::json(&[
+            super::MergeRequest {
+                id: String::from("merle/new-feature"),
+                merged: false,
+                updateable: false,
+        }]))
+    }
+
     /// Fetch a [`coco::source::Tree`].
     pub async fn tree(
         project_urn: coco::Urn,
@@ -276,6 +302,16 @@ mod handler {
 
         Ok(reply::json(&tree))
     }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MergeRequest {
+    id: String,
+    merged: bool,
+    updateable: bool,
+    // identity: identity::Identity,
+    // commits: coco::source::commits,
 }
 
 /// Bundled query params to pass to the commits handler.
