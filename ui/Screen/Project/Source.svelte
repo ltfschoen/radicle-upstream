@@ -28,6 +28,7 @@
   import Code from "./Source/Code.svelte";
   import Commit from "./Source/Commit.svelte";
   import Commits from "./Source/Commits.svelte";
+  import MergeRequests from "./Source/MergeRequests.svelte";
 
   export let project: Project;
   export let selectedPeer: User;
@@ -37,6 +38,7 @@
     "/projects/:urn/source/code": Code,
     "/projects/:urn/source/commit/:hash": Commit,
     "/projects/:urn/source/commits": Commits,
+    "/projects/:urn/source/merge_requests": MergeRequests,
   };
 
   const onCheckout = async (

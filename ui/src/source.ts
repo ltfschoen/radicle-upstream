@@ -1,7 +1,7 @@
 import { format } from "timeago.js";
 
 import * as api from "./api";
-import type { PeerId } from "./identity";
+import type { Identity, PeerId } from "./identity";
 import type { Urn } from "./urn";
 
 import type * as diff from "./source/diff";
@@ -117,6 +117,12 @@ export interface Branch {
 export interface Tag {
   type: RevisionType.Tag;
   name: string;
+}
+
+export interface MergeRequest {
+  id: string;
+  merged: boolean;
+  identity: Identity;
 }
 
 export interface Sha {
@@ -240,6 +246,12 @@ export const fetchTags = (projectUrn: Urn, peerId?: PeerId): Promise<Tag[]> => {
         return { type: RevisionType.Tag, name };
       })
     );
+};
+
+export const fetchMergeRequests = (
+  projectUrn: Urn
+): Promise<MergeRequest[]> => {
+  return api.get<MergeRequest[]>(`source/merge_requests/${projectUrn}`);
 };
 
 export const fetchTree = (
