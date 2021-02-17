@@ -265,13 +265,14 @@ mod handler {
     /// Fetch the list [`coco::source::Tag`].
     pub async fn merge_requests(
         _project_urn: coco::Urn,
-        _ctx: context::Unsealed,
+        ctx: context::Unsealed,
     ) -> Result<impl Reply, Rejection> {
+        let session = session::get_current(&ctx.store)?.expect("no session exists");
         Ok(reply::json(&[
             super::MergeRequest {
                 id: String::from("merle/new-feature"),
                 merged: false,
-                updateable: false,
+                identity: session.identity,
         }]))
     }
 
@@ -309,8 +310,7 @@ mod handler {
 struct MergeRequest {
     id: String,
     merged: bool,
-    updateable: bool,
-    // identity: identity::Identity,
+    identity: identity::Identity,
     // commits: coco::source::commits,
 }
 
