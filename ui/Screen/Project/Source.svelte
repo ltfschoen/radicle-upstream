@@ -24,6 +24,7 @@
   import RevisionSelector from "../../DesignSystem/Component/SourceBrowser/RevisionSelector.svelte";
 
   import CheckoutButton from "./Source/CheckoutButton.svelte";
+  import MergeRequestButton from "./Source/MergeRequestButton.svelte";
 
   import Code from "./Source/Code.svelte";
   import Commit from "./Source/Commit.svelte";
@@ -40,6 +41,11 @@
     "/projects/:urn/source/commits": Commits,
     "/projects/:urn/source/merge_requests": MergeRequests,
   };
+  let mergeRequestsTab = path.active(
+    path.projectSourceMergeRequests(project.urn),
+    get(location),
+    true
+  );
 
   const onCheckout = async (
     { detail: { checkoutPath } }: { detail: { checkoutPath: string } },
@@ -83,6 +89,7 @@
     ) {
       selectPath("");
     }
+    mergeRequestsTab = item.title === "Merge Requests";
   };
   const onSelectRevision = ({ detail: revision }: { detail: Branch | Tag }) => {
     selectRevision(revision);
@@ -103,22 +110,28 @@
   <ActionBar>
     <div slot="left">
       <div style="display: flex">
-        <div class="revision-selector-wrapper">
-          <RevisionSelector
-            loading={selectedRevision.request !== null}
-            on:select={onSelectRevision}
-            selected={selectedRevision.selected}
-            defaultBranch={project.metadata.defaultBranch}
-            {revisions} />
-        </div>
+        {#if !mergeRequestsTab}
+          <div class="revision-selector-wrapper">
+            <RevisionSelector
+              loading={selectedRevision.request !== null}
+              on:select={onSelectRevision}
+              selected={selectedRevision.selected}
+              defaultBranch={project.metadata.defaultBranch}
+              {revisions} />
+          </div>
+        {/if}
 
         <HorizontalMenu items={menuItems} on:select={onMenuSelect} />
       </div>
     </div>
     <div slot="right">
-      <CheckoutButton
-        fork={!isContributor}
-        on:checkout={ev => onCheckout(ev, project, selectedPeer)} />
+      {#if mergeRequestsTab}
+        <MergeRequestButton />
+      {:else}
+        <CheckoutButton
+          fork={!isContributor}
+          on:checkout={ev => onCheckout(ev, project, selectedPeer)} />
+      {/if}
     </div>
   </ActionBar>
 
