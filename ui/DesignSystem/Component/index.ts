@@ -18,8 +18,6 @@ import Label from "./Label.svelte";
 import List from "./List.svelte";
 import Modal from "./Modal.svelte";
 import ModalOverlay from "./ModalOverlay.svelte";
-import MergeRequestCard from "./MergeRequestCard.svelte";
-import MergeRequestList from "./MergeRequestList.svelte";
 import NavigationButtons from "./Registration/NavigationButtons.svelte";
 import NegativeDai from "./NegativeDai.svelte";
 import Notification from "./Notification.svelte";
@@ -67,8 +65,6 @@ export {
   KeyHint,
   Label,
   List,
-  MergeRequestCard,
-  MergeRequestList,
   Modal,
   ModalOverlay,
   NavigationButtons,

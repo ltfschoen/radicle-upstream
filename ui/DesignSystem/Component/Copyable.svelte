@@ -44,6 +44,7 @@
     cursor: pointer;
     display: inline-flex;
     white-space: nowrap;
+    max-width: -webkit-fill-available;
   }
 
   .basic {

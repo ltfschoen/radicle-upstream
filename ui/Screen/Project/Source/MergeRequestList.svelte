@@ -1,7 +1,7 @@
 <script lang="typescript">
-  import type { MergeRequest } from "../../src/source";
+  import type { MergeRequest } from "../../../src/source";
 
-  import List from "./List.svelte";
+  import { List } from "../../../DesignSystem/Component";
   import MergeRequestCard from "./MergeRequestCard.svelte";
 
   export let mergeRequests: MergeRequest[];
@@ -19,11 +19,11 @@
 </style>
 
 <List
-  dataCy="project-list"
+  dataCy="merge-request-list"
   items={mergeRequests}
   on:select
   let:item={mergeRequest}
-  style="margin: 0 auto;">
+  style="margin: 0 auto; overflow: visible;">
   <div class="list-item" data-cy={`project-list-entry-${mergeRequest}`}>
     <MergeRequestCard {mergeRequest} />
   </div>

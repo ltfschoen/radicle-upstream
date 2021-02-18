@@ -1,12 +1,8 @@
 <script lang="typescript">
   import { store } from "../../../src/screen/project/source";
 
-  import {
-    EmptyState,
-    Error,
-    MergeRequestList,
-    Remote,
-  } from "../../../DesignSystem/Component";
+  import { EmptyState, Error, Remote } from "../../../DesignSystem/Component";
+  import MergeRequestList from "./MergeRequestList.svelte";
 </script>
 
 <Remote {store} let:data={{ mergeRequests }}>
