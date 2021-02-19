@@ -272,8 +272,19 @@ mod handler {
             super::MergeRequest {
                 id: String::from("merle/new-feature"),
                 merged: false,
+                identity: session.identity.clone(),
+            },
+            super::MergeRequest {
+                id: String::from("add-readme"),
+                merged: true,
+                identity: session.identity.clone(),
+            },
+            super::MergeRequest {
+                id: String::from("fix-typo"),
+                merged: false,
                 identity: session.identity,
-        }]))
+            },
+        ]))
     }
 
     /// Fetch a [`coco::source::Tree`].
