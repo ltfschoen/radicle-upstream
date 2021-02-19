@@ -11,9 +11,14 @@
 
   let expanded = false;
   let hover = false;
+  let copyable;
   const hide = () => (expanded = false);
   const toggleDropdown = () => {
     expanded = !expanded;
+  };
+  const copy = () => {
+    copyable.copy();
+    toggleDropdown();
   };
   const caption = "Checkout";
   const instructions = `git checkout -b revisions/${id} remotes/${peerId}/refs/tags/revisions/${id}`;
@@ -45,7 +50,7 @@
       To check out this merge request locally, run this in your terminal:
     </p>
     <Hoverable bind:hovering={hover}>
-      <Copyable showIcon={hover}>
+      <Copyable bind:this={copyable} showIcon={hover}>
         <p
           class="typo-text-small-mono"
           style="color: var(--color-foreground-level-6); overflow: scroll">
@@ -53,6 +58,12 @@
         </p>
       </Copyable>
     </Hoverable>
+    <Button
+      variant="transparent"
+      style="display: block; margin: auto;"
+      on:click={copy}>
+      Copy
+    </Button>
   </div>
 
   <Button

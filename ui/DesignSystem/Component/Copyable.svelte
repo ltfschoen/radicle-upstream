@@ -21,7 +21,7 @@
 
   let copied = false;
 
-  const copy = () => {
+  export const copy = (): void => {
     if (copied) return;
 
     const content = copyContent.length ? copyContent : slotContent.textContent;
