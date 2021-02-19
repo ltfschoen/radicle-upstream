@@ -42,10 +42,23 @@ context("project creation", () => {
     });
   };
 
-  const withPlatinumStub = (callback: () => void) => {
+  // Create the given `branches` in the repo with name `repoName`,
+  // expected to be found within cypress/workspace.
+  const createBranches = (repoName: string, branches: string[]) => {
     cy.exec("pwd").then(result => {
       const pwd = result.stdout;
-      const platinumPath = `${pwd}/cypress/workspace/git-platinum-copy`;
+      const repoPath = `${pwd}/cypress/workspace/${repoName}`;
+      branches.forEach(branch =>
+        cy.exec(`cd ${repoPath}; git checkout -b ${branch};`)
+      );
+    });
+  };
+
+  const withPlatinumStub = (callback: (repoName: string) => void) => {
+    cy.exec("pwd").then(result => {
+      const pwd = result.stdout;
+      const repoName = "git-platinum-copy";
+      const platinumPath = `${pwd}/cypress/workspace/${repoName}`;
 
       cy.exec(`rm -rf ${platinumPath}`);
       cy.exec(
@@ -57,7 +70,7 @@ context("project creation", () => {
         stubs.IPC_DIALOG_SHOWOPENDIALOG.returns(platinumPath);
       });
 
-      callback();
+      callback(repoName);
 
       cy.exec(`rm -rf ${platinumPath}`);
     });
@@ -143,10 +156,7 @@ context("project creation", () => {
 
           // has to be no more than 64 characters long
           commands.pick("page", "name").clear();
-          commands
-            .pick("page", "name")
-            .invoke("val", "x".repeat(257))
-            .trigger("input");
+          commands.pasteInto(["page", "name"], "x".repeat(257));
           commands
             .pick("page")
             .contains(
@@ -170,10 +180,7 @@ context("project creation", () => {
 
             // the project description has to be no more than 256 characters long
             commands.pick("page", "description").clear();
-            commands
-              .pick("page", "description")
-              .invoke("val", "x".repeat(257))
-              .trigger("input");
+            commands.pasteInto(["page", "description"], "x".repeat(257));
             commands
               .pick("page")
               .contains(
@@ -192,7 +199,7 @@ context("project creation", () => {
             .contains("Pick a directory for the new project")
             .should("exist");
 
-          withPlatinumStub(() => {
+          withPlatinumStub(_ => {
             commands.pick("new-project", "choose-path-button").click();
 
             commands
@@ -223,6 +230,40 @@ context("project creation", () => {
             .pick("page", "new-project")
             .contains("Pick a directory for the new project")
             .should("exist");
+        });
+      });
+    });
+
+    context("importing existing repositories", () => {
+      it("preselects master as the default branch", () => {
+        withPlatinumStub(repoName => {
+          commands.pick("new-project-button").click();
+          commands.pick("name").should("not.be.disabled");
+          commands.pick("existing-project").click();
+          commands.pick("name").should("be.disabled");
+          commands.pick("existing-project", "choose-path-button").click();
+          // Make sure the UI has time to update path value from stub,
+          // this prevents this spec from failing on CI.
+          cy.wait(500);
+          commands.pick("name").should("have.value", repoName);
+          commands.pick("default-branch").contains("master");
+        });
+      });
+
+      it("preselects main as the default branch", () => {
+        withPlatinumStub(repoName => {
+          createBranches(repoName, ["main"]);
+
+          commands.pick("new-project-button").click();
+          commands.pick("name").should("not.be.disabled");
+          commands.pick("existing-project").click();
+          commands.pick("name").should("be.disabled");
+          commands.pick("existing-project", "choose-path-button").click();
+          // Make sure the UI has time to update path value from stub,
+          // this prevents this spec from failing on CI.
+          cy.wait(500);
+          commands.pick("name").should("have.value", repoName);
+          commands.pick("default-branch").contains("main");
         });
       });
     });
@@ -282,7 +323,7 @@ context("project creation", () => {
       });
 
       it("creates a new project from an existing repository", () => {
-        withPlatinumStub(() => {
+        withPlatinumStub(repoName => {
           commands.pick("new-project-button").click();
 
           commands.pick("name").should("not.be.disabled");
@@ -295,31 +336,28 @@ context("project creation", () => {
           // this prevents this spec from failing on CI.
           cy.wait(500);
 
-          commands.pick("name").should("have.value", "git-platinum-copy");
+          commands.pick("name").should("have.value", repoName);
+          commands.pick("default-branch").contains("master");
           commands.pick("description").type("Best project");
 
           commands.pick("create-project-button").click();
-          commands
-            .pick("project-screen", "header")
-            .contains("git-platinum-copy");
+          commands.pick("project-screen", "header").contains(repoName);
 
           commands.pick("project-screen", "header").contains("Best project");
 
           commands
             .pick("notification")
-            .contains("Project git-platinum-copy successfully created");
+            .contains(`Project ${repoName} successfully created`);
 
           commands.pick("profile").click();
-          commands
-            .pick("profile-screen", "project-list")
-            .contains("git-platinum-copy");
+          commands.pick("profile-screen", "project-list").contains(repoName);
           commands
             .pick("profile-screen", "project-list")
             .contains("Best project");
 
           commands
             .pick("notification")
-            .contains("Project git-platinum-copy successfully created")
+            .contains(`Project ${repoName} successfully created`)
             .should("exist");
           commands.pick("notification").contains("Close").click();
         });
