@@ -3,6 +3,7 @@
 
   import { Avatar, Icon } from "../../../DesignSystem/Primitive";
   import CheckoutMergeRequestButton from "./CheckoutMergeRequestButton.svelte";
+  import AcceptMergeRequestButton from "./AcceptMergeRequestButton.svelte";
 
   import type { MergeRequest } from "../../../src/source";
   import { isMaintainer } from "../../../src/project";
@@ -49,6 +50,8 @@
   .actions-column {
     /* TODO: this should be replaced by having the column at the right end */
     margin-left: 30rem;
+    display: flex;
+    flex-direction: row;
   }
 </style>
 
@@ -82,6 +85,7 @@
         <CheckoutMergeRequestButton
           id={mergeRequest.id}
           peerId={mergeRequest.identity.peerId} />
+        <AcceptMergeRequestButton id={mergeRequest.id} />
       {/if}
     </div>
   </div>
