@@ -122,6 +122,8 @@ export interface Tag {
 export interface MergeRequest {
   id: string;
   merged: boolean;
+  peer_id: string;
+  // TODO make this optional
   identity: Identity;
 }
 

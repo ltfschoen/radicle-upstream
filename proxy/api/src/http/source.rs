@@ -264,27 +264,41 @@ mod handler {
 
     /// Fetch the list [`coco::source::Tag`].
     pub async fn merge_requests(
-        _project_urn: coco::Urn,
+        project_urn: coco::Urn,
         ctx: context::Unsealed,
     ) -> Result<impl Reply, Rejection> {
         let session = session::get_current(&ctx.store)?.expect("no session exists");
-        Ok(reply::json(&[
+        let fake_merge_requests = vec![
             super::MergeRequest {
                 id: String::from("merle/new-feature"),
                 merged: false,
-                identity: session.identity.clone(),
+                peer_id: session.identity.peer_id,
+                identity: Some(session.identity.clone()),
             },
             super::MergeRequest {
                 id: String::from("add-readme"),
                 merged: true,
-                identity: session.identity.clone(),
+                peer_id: session.identity.peer_id,
+                identity: Some(session.identity.clone()),
             },
             super::MergeRequest {
                 id: String::from("fix-typo"),
                 merged: false,
-                identity: session.identity,
+                peer_id: session.identity.peer_id,
+                identity: Some(session.identity),
             },
-        ]))
+        ];
+
+        let merge_requests = coco::merge_request::list(&ctx.state, project_urn)
+            .await
+            .map_err(error::Error::from)?;
+        let merge_requests = merge_requests
+            .into_iter()
+            .map(super::MergeRequest::from)
+            .chain(fake_merge_requests)
+            .collect::<Vec<_>>();
+
+        Ok(reply::json(&merge_requests))
     }
 
     /// Fetch a [`coco::source::Tree`].
@@ -321,8 +335,23 @@ mod handler {
 struct MergeRequest {
     id: String,
     merged: bool,
-    identity: identity::Identity,
+    peer_id: coco::PeerId,
+    identity: Option<identity::Identity>,
     // commits: coco::source::commits,
+}
+
+impl From<coco::merge_request::MergeRequest> for MergeRequest {
+    fn from(merge_request: coco::merge_request::MergeRequest) -> Self {
+        let coco::merge_request::MergeRequest { id, merged, peer } = merge_request;
+        Self {
+            id,
+            merged,
+            peer_id: peer.peer_id(),
+            identity: peer
+                .replicated()
+                .map(|peer| identity::Identity::from((peer.peer_id(), peer.status().user.clone()))),
+        }
+    }
 }
 
 /// Bundled query params to pass to the commits handler.
