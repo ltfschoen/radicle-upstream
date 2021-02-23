@@ -1,3 +1,5 @@
+use radicle_surf::git::BranchType;
+
 #[derive(Debug, Clone)]
 pub struct MergeRequest {
     pub id: String,
@@ -15,19 +17,25 @@ pub async fn list(
 ) -> Result<Vec<MergeRequest>, crate::state::Error> {
     let mut merge_requests = Vec::new();
     for peer in state.list_project_peers(project.clone()).await? {
-        let default_branch = state
-            .get_branch(project.clone(), peer.peer_id(), None)
-            .await?;
-        let tags = state
-            .with_browser(default_branch, |browser| crate::source::tags(browser))
+        let default_branch = state.find_default_branch(project.clone()).await?;
+        let branches = state
+            .with_browser(default_branch, |browser| {
+                let branches = browser.list_branches(Some(BranchType::Remote {
+                    name: Some(peer.peer_id().to_string()),
+                }))?;
+                Ok(branches)
+            })
             .await?;
 
-        for tag in tags {
-            merge_requests.push(MergeRequest {
-                id: tag.0,
-                merged: false,
-                peer: peer.clone(),
-            })
+        for branch in branches {
+            let name = branch.name.to_string();
+            if let Some(id) = name.strip_prefix("merge-requests/") {
+                merge_requests.push(MergeRequest {
+                    id: id.to_owned(),
+                    merged: false,
+                    peer: peer.clone(),
+                })
+            }
         }
     }
     Ok(merge_requests)
