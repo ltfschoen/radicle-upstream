@@ -71,13 +71,9 @@
         <Avatar
           avatarFallback={mergeRequest.identity.avatarFallback}
           size="small"
-          style="display: flex; justify-content: flex-start; margin-right: 0.5rem;"
+          style="display: flex; justify-content: flex-start; margin-left: 0.5rem;"
+          title={mergeRequest.identity.metadata.handle}
           variant="circle" />
-        <p
-          class="typo-text-bold"
-          style="color: var(--color-foreground-level-6);">
-          {mergeRequest.identity.metadata.handle}
-        </p>
       </div>
     </div>
     <div class="actions-column">

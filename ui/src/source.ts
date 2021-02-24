@@ -127,6 +127,16 @@ export interface MergeRequest {
   identity: Identity;
 }
 
+export interface MergeRequestDetails {
+  id: string;
+  merged: boolean;
+  peer_id: string;
+  // TODO make this optional
+  identity: Identity;
+  title: string;
+  description: string;
+}
+
 export interface Sha {
   type: RevisionType.Sha;
   sha: string;
@@ -254,6 +264,16 @@ export const fetchMergeRequests = (
   projectUrn: Urn
 ): Promise<MergeRequest[]> => {
   return api.get<MergeRequest[]>(`source/merge_requests/${projectUrn}`);
+};
+
+export const fetchMergeRequest = (
+  projectUrn: Urn,
+  peerId: string,
+  id: string
+): Promise<MergeRequestDetails> => {
+  return api.get<MergeRequestDetails>(`source/merge_request/${projectUrn}/`, {
+    query: { peerId, id },
+  });
 };
 
 export const fetchTree = (

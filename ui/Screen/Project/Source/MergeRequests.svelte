@@ -1,16 +1,24 @@
 <script lang="typescript">
-  import { store } from "../../../src/screen/project/source";
+  import { getContext } from "svelte";
+  import { push } from "svelte-spa-router";
+
+  import * as path from "../../../src/path";
+  import type { Project } from "../../../src/project";
+  import { fetchMergeRequest, store } from "../../../src/screen/project/source";
+  import type { MergeRequest } from "../../../src/source";
 
   import { EmptyState, Error, Remote } from "../../../DesignSystem/Component";
   import MergeRequestList from "./MergeRequestList.svelte";
+
+  const project: Project = getContext("project-page").project;
+  const select = ({ detail: mergeRequest }: { detail: MergeRequest }) => {
+    fetchMergeRequest(mergeRequest.peerId, mergeRequest.id);
+    push(path.projectSourceMergeRequest(project.urn));
+  };
 </script>
 
 <Remote {store} let:data={{ mergeRequests }}>
-  <MergeRequestList
-    {mergeRequests}
-    on:select={() => {
-      console.log('Selected a merge request');
-    }} />
+  <MergeRequestList {mergeRequests} on:select={select} />
 
   <div slot="empty">
     <EmptyState

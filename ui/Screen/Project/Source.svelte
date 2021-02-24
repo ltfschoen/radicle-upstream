@@ -30,6 +30,7 @@
   import Commit from "./Source/Commit.svelte";
   import Commits from "./Source/Commits.svelte";
   import MergeRequests from "./Source/MergeRequests.svelte";
+  import MergeRequest from "./Source/MergeRequest.svelte";
 
   export let project: Project;
   export let selectedPeer: User;
@@ -40,6 +41,7 @@
     "/projects/:urn/source/commit/:hash": Commit,
     "/projects/:urn/source/commits": Commits,
     "/projects/:urn/source/merge_requests": MergeRequests,
+    "/projects/:urn/source/merge_request": MergeRequest,
   };
   let mergeRequestsTab = path.active(
     path.projectSourceMergeRequests(project.urn),

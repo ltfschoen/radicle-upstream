@@ -366,6 +366,35 @@ const mapRevisions = (
   return branches;
 };
 
+const mergeRequestDetailsStore = remote.createStore<source.MergeRequestDetails>();
+export const mergeRequestDetails = mergeRequestDetailsStore.readable;
+
+export const fetchMergeRequest = async (
+  peerId: string,
+  id: string
+): Promise<void> => {
+  const screen = get(screenStore);
+
+  if (screen.status === remote.Status.Success) {
+    const {
+      data: { project },
+    } = screen;
+
+    try {
+      mergeRequestDetailsStore.success(
+        await source.fetchMergeRequest(project.urn, peerId, id)
+      );
+    } catch (err) {
+      mergeRequestDetailsStore.error(error.fromException(err));
+      error.show({
+        code: error.Code.CommitFetchFailure,
+        message: "Could not fetch merge request",
+        source: err,
+      });
+    }
+  }
+};
+
 const menuItems = (
   project: Project,
   history: source.CommitsHistory,
