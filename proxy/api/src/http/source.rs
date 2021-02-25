@@ -322,15 +322,14 @@ mod handler {
         ctx: context::Unsealed,
     ) -> Result<impl Reply, Rejection> {
         let session = session::get_current(&ctx.store)?.expect("no session exists");
-        let fake_merge_request =
-            super::MergeRequestDetails {
-                id: String::from("fix-typo"),
-                merged: false,
-                peer_id: session.identity.peer_id,
-                identity: Some(session.identity),
-                title: "This fixes a typo".to_string(),
-                description: "Replace a with b.".to_string()
-            };
+        let fake_merge_request = super::MergeRequestDetails {
+            id: String::from("fix-typo"),
+            merged: false,
+            peer_id: session.identity.peer_id,
+            identity: Some(session.identity),
+            title: "This fixes a typo".to_string(),
+            description: "Replace a with b.".to_string(),
+        };
 
         Ok(reply::json(&fake_merge_request))
     }

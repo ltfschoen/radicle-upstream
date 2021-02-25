@@ -16,20 +16,19 @@ pub async fn list(
     project: crate::Urn,
 ) -> Result<Vec<MergeRequest>, crate::state::Error> {
     let mut merge_requests = Vec::new();
+    // TODO: only browse specifc peer
     for peer in state.list_project_peers(project.clone()).await? {
         let default_branch = state.find_default_branch(project.clone()).await?;
-        let branches = state
+        let tags = state
             .with_browser(default_branch, |browser| {
-                let branches = browser.list_branches(Some(BranchType::Remote {
-                    name: Some(peer.peer_id().to_string()),
-                }))?;
-                Ok(branches)
+                let tags = browser.list_tags()?;
+                Ok(tags)
             })
             .await?;
 
-        for branch in branches {
-            let name = branch.name.to_string();
-            if let Some(id) = name.strip_prefix("merge-requests/") {
+        for tag in tags {
+            let name = tag.name().to_string();
+            if let Some(id) = name.strip_prefix("merge-request/") {
                 merge_requests.push(MergeRequest {
                     id: id.to_owned(),
                     merged: false,

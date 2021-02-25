@@ -79,9 +79,12 @@ export const createMergeRequest = (
 export PATH=$PWD/target/release:$PATH
 cd ${options.repositoryPath}
 git commit --allow-empty -m "${options.subject}"
-git tag -a --message "This is an awesome feature" ${options.tag} HEAD
-git symbolic-ref refs/heads/merge-requests/${options.tag} ${options.tag}
-git -c credential.helper=${credentialsHelper(options.passphrase)} push rad`,
+git tag -a --message "This is an awesome feature" merge-request/${
+      options.tag
+    } HEAD
+git -c credential.helper=${credentialsHelper(
+      options.passphrase
+    )} push --tag rad`,
     {
       env: {
         HOME: options.radHome,

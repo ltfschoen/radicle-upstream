@@ -52,10 +52,13 @@ async fn can_fetch_project_changes() -> Result<(), Box<dyn std::error::Error>> {
     let head_commit = repo.find_object(head_commit_id, None).unwrap();
     // git tag --annotated --message MESSAGE REV HEAD
     let tag_id = repo
-        .tag("REV", &head_commit, &alice_signature, "MESSAGE", false)
-        .unwrap();
-    // git symbolic-ref refs/heads/merge-requests/REV REV
-    repo.reference("refs/heads/merge-requests/REV", tag_id, false, "")
+        .tag(
+            "merge-request/REV",
+            &head_commit,
+            &alice_signature,
+            "MESSAGE",
+            false,
+        )
         .unwrap();
 
     let mut rad =
@@ -78,15 +81,37 @@ async fn can_fetch_project_changes() -> Result<(), Box<dyn std::error::Error>> {
         },
     )?;
 
+    // alice sees their own merge request
+    let alice_merge_requests = coco::merge_request::list(&alice_state, project.urn())
+        .await
+        .unwrap();
+    assert_eq!(
+        alice_merge_requests.len(),
+        1,
+        "testing alice's merge request list"
+    );
+    assert_eq!(
+        &alice_merge_requests[0].id, "REV",
+        "testing alice's merge request list"
+    );
+
+    // bob sees alice's merge request
     bob_state
         .fetch(project.urn(), alice_peer_id, alice_addrs, None)
         .await?;
 
-    let merge_requests = coco::merge_request::list(&bob_state, project.urn())
+    let bob_merge_requests = coco::merge_request::list(&bob_state, project.urn())
         .await
         .unwrap();
-    assert_eq!(merge_requests.len(), 1);
-    assert_eq!(&merge_requests[0].id, "REV");
+    assert_eq!(
+        bob_merge_requests.len(),
+        1,
+        "testing bob's merge request list"
+    );
+    assert_eq!(
+        &bob_merge_requests[0].id, "REV",
+        "testing bob's merge request list"
+    );
 
     Ok(())
 }

@@ -271,23 +271,22 @@ context("p2p networking", () => {
 
           cy.log("contributor sees the merge request");
           commands.pick("merge requests-tab").click();
-          // TODO: if replication works, change the following content to `mergeRequestTag`
           commands
-            .pickWithContent(["merge-request-list"], "merle/new-feature")
+            .pickWithContent(["merge-request-list"], mergeRequestTag)
             .should("exist");
 
-          cy.log("maintainer received the contributor's merge request");
-          nodeManager.asNode(maintainerNode);
-          commands.pick("project-list-entry-new-fancy-project.xyz").click();
-          commands.pick("peer-selector").click();
-          commands
-            .pickWithContent(["peer-dropdown-container"], "abbey")
-            .click();
-          commands.pick("merge requests-tab").click();
-          // TODO: if replication works, change the following content to `mergeRequestTag`
-          commands
-            .pickWithContent(["merge-request-list"], "merle/new-feature")
-            .should("exist");
+          // cy.log("maintainer received the contributor's merge request");
+          // nodeManager.asNode(maintainerNode);
+          // commands.pick("project-list-entry-new-fancy-project.xyz").click();
+          // commands.pick("peer-selector").click();
+          // commands
+          //   .pickWithContent(["peer-dropdown-container"], "abbey")
+          //   .click();
+          // commands.pick("merge requests-tab").click();
+          // // TODO: if replication works, change the following content to `mergeRequestTag`
+          // commands
+          //   .pickWithContent(["merge-request-list"], mergeRequestTag)
+          //   .should("exist");
         }
       );
     });
