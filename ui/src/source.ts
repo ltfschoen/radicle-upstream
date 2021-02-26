@@ -128,13 +128,8 @@ export interface MergeRequest {
 }
 
 export interface MergeRequestDetails {
-  id: string;
-  merged: boolean;
-  peer_id: string;
-  // TODO make this optional
-  identity: Identity;
-  title: string;
-  description: string;
+  mergeRequest: MergeRequest;
+  commits: CommitsHistory;
 }
 
 export interface Sha {

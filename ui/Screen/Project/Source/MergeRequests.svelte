@@ -12,7 +12,7 @@
 
   const project: Project = getContext("project-page").project;
   const select = ({ detail: mergeRequest }: { detail: MergeRequest }) => {
-    fetchMergeRequest(mergeRequest.peerId, mergeRequest.id);
+    fetchMergeRequest(mergeRequest);
     push(path.projectSourceMergeRequest(project.urn));
   };
 </script>

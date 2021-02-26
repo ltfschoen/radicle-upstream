@@ -1,11 +1,8 @@
-use radicle_surf::git::BranchType;
-
 #[derive(Debug, Clone)]
 pub struct MergeRequest {
     pub id: String,
     pub merged: bool,
     pub peer: crate::project::Peer<crate::project::peer::Status<crate::Person>>,
-    // commits: coco::source::commits,
 }
 
 /// TODO

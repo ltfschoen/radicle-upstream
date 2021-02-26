@@ -370,8 +370,7 @@ const mergeRequestDetailsStore = remote.createStore<source.MergeRequestDetails>(
 export const mergeRequestDetails = mergeRequestDetailsStore.readable;
 
 export const fetchMergeRequest = async (
-  peerId: string,
-  id: string
+  mergeRequest: source.MergeRequest
 ): Promise<void> => {
   const screen = get(screenStore);
 
@@ -381,9 +380,19 @@ export const fetchMergeRequest = async (
     } = screen;
 
     try {
-      mergeRequestDetailsStore.success(
-        await source.fetchMergeRequest(project.urn, peerId, id)
+      const revision: source.Tag = {
+        type: source.RevisionType.Tag,
+        name: `merge-request/${mergeRequest.id}`,
+      };
+      const commits = await source.fetchCommits(
+        project.urn,
+        mergeRequest.peer_id,
+        revision
       );
+      mergeRequestDetailsStore.success({
+        mergeRequest,
+        commits,
+      });
     } catch (err) {
       mergeRequestDetailsStore.error(error.fromException(err));
       error.show({
